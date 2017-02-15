@@ -1,0 +1,12 @@
+{% extends 'ccblog/base.html' %}
+ 
+{% block title %}home page{% endblock %}
+ 
+{% block content %}
+welcome
+
+<form action="/logout/" method="get">
+    <input type="submit" value="logout">
+</form>
+
+{% endblock %}

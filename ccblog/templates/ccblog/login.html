@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}Default Title{% endblock %} - djangotest</title>
+</head>
+<body>
+<div style="padding-left:20px;padding-top:20px;">
+	<form action="/login/" method="post">
+		{% csrf_token %}
+		username: <input type="text" name="username"> <br>
+		password: <input type="password" name="password"> <br>
+		<input type="submit" value="login"><br/>
+		<font color="red">{{ message }}</font>
+	</form>
+</div>
+</body>
+</html>
