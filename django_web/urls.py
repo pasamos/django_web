@@ -22,4 +22,6 @@ urlpatterns = [
     url(r'^$', ccblog_views.login),
     url(r'^login/', ccblog_views.login),
     url(r'^logout/', ccblog_views.logout),
+    url(r'^blogtype/',ccblog_views.user_blogtype),
+    url(r'^blog/',ccblog_views.user_blog),
 ]
