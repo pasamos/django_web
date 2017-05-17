@@ -5,31 +5,115 @@
 {% block script %}
 	<script>
 		$(document).ready(function(){
-			//get blogtype
-			$.get("/blogtype/",null, function(ret){
-				var html='<br />';
-				$.each(ret, function(i,item){
-					html+= "<a name=\"typebtn\" typeid=\""+item.id+"\">"+item.typeName +"</a><br />";
-					
-				});
-				$('#divblogtype').html(html)
-			});
+			getBlogtype();
 			
 			//blogtype click
 			$('body').on('click', "a[name='typebtn']", function(){
 				var typeid=$(this).attr("typeid");
 				getBlog(typeid);
 			});
-
+			
 			getBlog(0);
+			
+			//delete blogtype
+			$('body').on('click', "a[name='delbtn']", function(){
+				var typeid=$(this).attr("typeid");
+				deleteBlogtype(typeid);
+			});
+			//rename blogtype
+			$('body').on('click', "a[name='editbtn']", function(){
+				var typeid=$(this).attr("typeid");
+				var typeName = $("#blogtypeName").val();
+				if(typeName=="" || typeName==DefaultTip){
+					alert("Please enter type name!");
+				}
+				else{
+					editBlogtype(typeid,typeName);
+				}
+			});
+			//new blogtype name
+			var DefaultTip = "enter new type name";
+			$("#blogtypeName").focus(function(){
+				if($(this).val() == DefaultTip){
+					$(this).val("");
+					$(this).css("color","black");
+				}
+			});  
+			$("#blogtypeName").blur(function(){
+				if($(this).val() == ""){
+					$(this).val(DefaultTip);
+					$(this).css("color","gray");
+				}
+			});
+			//add new blogtype
+			$("#btnAddBlogtype").click(function(){
+				var typeName = $("#blogtypeName").val();
+				if(typeName=="" || typeName==DefaultTip){
+					alert("Please enter type name!");
+				}
+				else{
+					addBlogtype(typeName);
+				}
+				
+			});
+
+			//add new blog
+			$("#btnAddBlog").click(function(){
+				alert("new blog");
+			});
 		});
 
-		
+		//get blogtype
+		function getBlogtype(){
+			$.get("/blogtype/",null, function(ret){
+				var html='';
+				$.each(ret, function(i,item){
+					html+= "<li><a name=\"typebtn\" href=\"#\" typeid=\""+item.id+"\">"+item.typeName +"</a>";
+					html+= "&nbsp&nbsp <a name=\"delbtn\" href=\"#\" typeid=\""+item.id+"\"><font color=\"gray\" size=\"1\">[Delete </font></a>";
+					html+= "<a name=\"editbtn\" href=\"#\" typeid=\""+item.id+"\"><font color=\"gray\" size=\"1\">| Rename]</font></a>";
+					html+= "</li>";
+				});
+				$('#ulblogtype').html(html)
+			});
+		}
+		//add blogtype
+		function addBlogtype(name){
+			$.post("/addblogtype/",{name:name},function(result){
+				if(result.code==1){
+					getBlogtype();
+				}
+				else{
+					alert("failed! "+result.msg);
+				}
+			});
+		}
+		//edit Blogtype
+		function editBlogtype(id,name){
+			$.post("/editblogtype/",{id:id,name:name},function(result){
+				if(result.code==1){
+					getBlogtype();
+				}
+				else{
+					alert("failed! "+result.msg);
+				}
+			});
+		}
+		//delete Blogtype
+		function deleteBlogtype(id){
+			$.post("/delblogtype/",{id:id},function(result){
+				if(result.code==1){
+					getBlogtype();
+				}
+				else{
+					alert("failed! "+result.msg);
+				}
+			});
+		}
+
 		//get blog
 		function getBlog(blogtypeid){
 			$.get("/blog?blogtypeid="+blogtypeid,null, function(ret){
-				var html='<br />';
-				html+='<table><tr> <td style=\"width:200px\">title</td> <td>content</td> <td style=\"width:200px\">createTime</td></tr>';
+				var html='<table><tr><th style=\"width:200px\">title</th><th>content</th><th style=\"width:200px\">createTime</th></tr>';
 
 				$.each(ret, function(i,item){
 					html+= "<tr> <td>"+item.title+"</td>";
@@ -46,16 +130,22 @@
 
 
 {% block content %}
-	<form action="/logout/" method="get">
-		<input type="submit" value="logout">
+	<form action="/logout/" method="get" style="width:900px" >
+		<input type="submit" value="logout" style="float:right">
 	</form>
-	{{message}}
-	<br />
-	welcome <strong> {{username}}</strong>
-	<br />
+	{{message}}<br />
+	welcome <strong> {{username}}</strong> ({{loginCount}} times)<br />
 
-	<div id="divblogtype"></div>
+	<div>
+		<ul id="ulblogtype"></ul>
 
+		<ul><li>
+			<a href="#" id="btnAddBlogtype"><font color="gray" size="2">[Add new type]</font></a>
+			<input id="blogtypeName" type="text" width="100px" value="enter new type name" style="color:gray">
+		</li></ul>
+	</div>
+
+	<input type="button" id="btnAddBlog" value="Add New Blog">
 	<div id="divblog"></div>
 
 {% endblock %}

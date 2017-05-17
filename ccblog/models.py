@@ -6,7 +6,8 @@ class User(models.Model):
     phone = models.CharField(max_length=11,unique=True)
     password = models.CharField(max_length=30)
     valid = models.BooleanField()
-
+    loginCount = models.IntegerField(default=0)
+    
     def __str__(self):
         return 'phone:' + self.phone
 
