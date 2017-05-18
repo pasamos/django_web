@@ -4,15 +4,15 @@ from ccblog.models import BlogType
 from ccblog.models import Blog
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.http import HttpResponseRedirect
 
 def login(request):
     if request.method == 'POST':
         username=request.POST['username']
-	password=request.POST['password']
-	if username=='' or password=='':
-	    return render(request, "ccblog/login.html", {"message":"input username and password!"})
-
-        #13888888888   123
+        password=request.POST['password']
+        if username=='' or password=='':
+            return render(request, "ccblog/login.html", {"message":"input username and password!"})
+            #13888888888   123
         user = User.objects.filter(phone=username).values('id','name' , 'phone', 'password', 'loginCount')
         if list(user)!=[]:
             correctPassword=list(user)[0]['password']
@@ -30,17 +30,20 @@ def login(request):
                 return render(request, "ccblog/login.html",{"message":"wrong password!"})
         else:
             return render(request, "ccblog/login.html",{"message":"wrong username!"})
-        
+
     if request.method == 'GET':
         userSession = request.session.get('username',default=None)
         if userSession!=None:
-            context={}
-            context['username'] = userSession
-            context['loginCount'] = request.session.get('loginCount',default=None)
-            context['message'] = 'login success!'
-            return render(request, "ccblog/home.html", context)
-        
+            return HttpResponseRedirect('/home/')
+
     return render(request, "ccblog/login.html")
+
+def home(request):
+    context = {}
+    context['username'] = request.session.get('username', default=None)
+    context['loginCount'] = request.session.get('loginCount', default=None)
+    context['message'] = 'login success!'
+    return render(request, "ccblog/home.html", context)
 
 def logout(request):
     username = request.session.get('username',default=None)
@@ -129,15 +132,81 @@ def user_editblogtype(request):
             return render(request, "ccblog/login.html")
 
 
-def user_blog(request):
+def user_bloglist(request):
     userid = request.session.get('userid',default=None)
     blogtypeid = 0
     if request.GET.get('blogtypeid')!=None:
         blogtypeid = request.GET['blogtypeid']
     
     if userid!=None:
-        blog = Blog.objects.filter(userId=userid, blogTypeId=blogtypeid).values('userId','blogTypeId','title','content','createTime').order_by("createTime")
+        blog = Blog.objects.filter(userId=userid, blogTypeId=blogtypeid).values('id', 'userId','blogTypeId','title','content','createTime','lastModifyTime').order_by("createTime")
         return JsonResponse(list(blog), safe=False)
     else:
         return render(request, "ccblog/login.html")
 
+def user_blog(request):
+    userid = request.session.get('userid', default=None)
+    if userid != None:
+        if request.method == 'GET':
+            blogid = 0
+            if request.GET.get('id') != None:
+                blogid = request.GET['id']
+
+            if blogid == 0:
+                return render(request, "ccblog/blog.html", {})
+            else:
+                blog = Blog.objects.filter(userId=userid, id=blogid).values('id', 'userId', 'blogTypeId', 'title', 'content')
+                if (len(list(blog)) > 0):
+                    context = {}
+                    context['id'] = blog[:1][0]['id']
+                    context['blogtypeid'] = blog[:1][0]['blogTypeId']
+                    context['title'] = blog[:1][0]['title']
+                    context['content'] = blog[:1][0]['content']
+                    return render(request, "ccblog/blog.html", context)
+                else:
+                    return HttpResponseRedirect('/home/')
+
+        if request.method == 'POST':
+            blogid = request.POST['id']
+            title = request.POST['title']
+            content = request.POST['content']
+            blogTypeId = request.POST['blogtypeid']
+            if title == '' or content == '':
+                return render(request, "ccblog/blog.html", {"message": "title and content can not be empty!"})
+
+            if (blogid=="0"):
+                newblog = Blog(userId=userid, title=title, content=content, blogTypeId=blogTypeId)
+                newblog.save()
+                return HttpResponseRedirect('/home/')
+            else:
+                blog = Blog.objects.filter(userId=userid, id=blogid).all()
+                if (len(list(blog)) > 0):
+                    editblog = blog[:1][0]
+                    editblog.title = title
+                    editblog.content = content
+                    editblog.blogTypeId = blogTypeId
+                    editblog.save()
+                    return HttpResponseRedirect('/home/')
+                else:
+                    return render(request, "ccblog/blog.html", {"message": "blog not exists!"})
+    else:
+        return render(request, "ccblog/login.html")
+
+
+@csrf_exempt
+def user_delblog(request):
+    if request.method == 'POST':
+        blogid = request.POST['id']
+        if blogid == '':
+            return JsonResponse({"code": -1, "msg": "id can not be empty!"}, safe=False)
+
+        userid = request.session.get('userid', default=None)
+        if userid != None:
+            blog = Blog.objects.filter(userId=userid, id=blogid).all()
+            if (len(list(blog)) > 0):
+                blog[:1][0].delete()
+                return JsonResponse({"code": 1, "msg": "delete blog success!"}, safe=False)
+            else:
+                return JsonResponse({"code": -1, "msg": "blog not exists!"}, safe=False)
+        else:
+            return render(request, "ccblog/login.html")

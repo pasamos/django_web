@@ -57,9 +57,20 @@
 				
 			});
 
+			//edit blog
+			$('body').on('click', "a[name='editblogbtn']", function(){
+				var blogid=$(this).attr("blogid");
+				self.location="/blog?id="+blogid;
+			});
 			//add new blog
 			$("#btnAddBlog").click(function(){
-				alert("new blog");
+				self.location="/blog/";
+			});
+			//delete blog
+			$('body').on('click', "a[name='delblogbtn']", function(){
+				var blogid=$(this).attr("blogid");
+				var typeid=$(this).attr("typeid");
+				deleteBlog(blogid,typeid);
 			});
 		});
 
@@ -112,18 +123,34 @@
 
 		//get blog
 		function getBlog(blogtypeid){
-			$.get("/blog?blogtypeid="+blogtypeid,null, function(ret){
-				var html='<table><tr><th style=\"width:200px\">title</th><th>content</th><th style=\"width:200px\">createTime</th></tr>';
+			$.get("/bloglist?blogtypeid="+blogtypeid,null, function(ret){
+				var html='<table><tr><th style=\"width:120px\">Title</th><th>Content</th><th style=\"width:160px\">Create Time</th><th style=\"width:160px\">Last Modify Time</th><th style=\"width:100px\"></th></tr>';
 
 				$.each(ret, function(i,item){
 					html+= "<tr> <td>"+item.title+"</td>";
 					html+= "<td>"+(item.content.length>7?item.content.substr(0,6)+"...":item.content)+"</td>";
 					var date = new Date(item.createTime).toISOString().replace(/T/g,' ').replace(/\.[\d]{3}Z/,'')  
-					html+= "<td>"+date+"</td></tr>";
+					html+= "<td>"+date+"</td>";
+					var lastdate = new Date(item.lastModifyTime).toISOString().replace(/T/g,' ').replace(/\.[\d]{3}Z/,'')
+					html+= "<td>"+lastdate+"</td>";
+					html+= "<td><a name=\"delblogbtn\" href=\"#\" blogid=\""+item.id+"\" typeid=\""+blogtypeid+"\">Delete</a>"
+					html+= "&nbsp&nbsp <a name=\"editblogbtn\" href=\"#\" blogid=\""+item.id+"\" typeid=\""+blogtypeid+"\">Edit</a></td>"
+					html+= "</tr>";
 				});
 				html+='</table>';
 				$('#divblog').html(html)
 			})
+		}
+		//delete blog
+		function deleteBlog(id,typeid){
+			$.post("/delblog/", { id: id }, function(result){
+				if(result.code==1){
+					getBlog(typeid);
+				}
+				else{
+					alert("failed! "+result.msg);
+				}
+			});
 		}
 	</script>
 {% endblock %}
@@ -145,7 +172,7 @@
 		</li></ul>
 	</div>
 
-	<input type="button" id="btnAddBlog" value="Add New Blog">
+	<input type="submit" id="btnAddBlog" value="Add New Blog">
 	<div id="divblog"></div>
 
 {% endblock %}

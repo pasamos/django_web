@@ -10,7 +10,7 @@ class BlogTypeAdmin(admin.ModelAdmin):
     list_display = ('id', 'userId', 'typeName')
 
 class BlogAdmin(admin.ModelAdmin):
-    list_display = ('userId', 'title', 'createTime', 'blogTypeId')
+    list_display = ('userId', 'title', 'createTime', 'lastModifyTime', 'blogTypeId')
 
 
 admin.site.register(models.User, UserAdmin)

@@ -1,0 +1,32 @@
+{% extends 'ccblog/base.html' %}
+
+{% block title %}blog{% endblock %}
+
+{% block script %}
+	<script>
+        $(document).ready(function(){
+            //return home page
+			$("#cancel").click(function(){
+				self.location="/home/";
+			});
+        })
+	</script>
+{% endblock %}
+
+{% block content %}
+	<form action="/logout/" method="get" style="width:900px" >
+		<input type="submit" value="logout" style="float:right">
+	</form>
+
+    <form action="/blog/" method="post" style="float:right">
+        {% csrf_token %}
+        blogid:<input type="text" name="id"> {{id}}<br>
+        blogtype: <input type="text" name="blogtypeid"> {{blogtypeid}}<br>
+        title: <input type="text" name="title"> {{title}}<br>
+        content: <input type="text" name="content"> {{content}}<br>
+        <input type="submit" value="save blog">
+        <input type="button" value="cancel" id="cancel">
+        <br/><font color="red">{{ message }}</font>
+    </form>
+
+{% endblock %}

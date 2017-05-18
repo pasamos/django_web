@@ -19,6 +19,7 @@ class Blog(models.Model):
     userId = models.IntegerField()
     title = models.CharField(max_length=30)
     content = models.CharField(max_length=500)
-    createTime = models.DateTimeField()
+    createTime = models.DateTimeField(auto_now_add = True)
     blogTypeId = models.IntegerField()
+    lastModifyTime = models.DateTimeField(auto_now = True)
 
