@@ -6,27 +6,82 @@
 	<script>
         $(document).ready(function(){
             //return home page
-			$("#cancel").click(function(){
+			$("#btncancel").click(function(){
 				self.location="/home/";
 			});
+
+            //blog type
+            $.get("/blogtype/",null, function(ret){
+			    $('#blogtypeid').empty();
+				$.each(ret, function(i,item){
+					$('#blogtypeid').append("<option value='"+item.id+"'>"+item.typeName+"</option>");
+				});
+				var oldblogtypeid=$("#oldblogtypeid").val();
+				$('#blogtypeid').val(oldblogtypeid);
+			});
+
+            //save blog
+            $("#btnsave").click(function(){
+                var id = $("#id").val();
+                var blogtypeid = $("#blogtypeid").val();
+                var title = $("#title").val();
+                var content = $("#content").val();
+                if(id==""){
+                    alert("errors!");
+                    return;
+                }
+                if(blogtypeid==null){
+                    alert("please choose blog type!");
+                    return;
+                }
+                if(title==""){
+                    alert("title can not be empty!");
+                    return;
+                }
+                if(content==""){
+                    alert("content can not be empty!");
+                    return;
+                }
+
+                $.post("/blog/",{ id: id, blogtypeid: blogtypeid, title: title, content: content},function(result){
+                    if(result.code==1){
+                        self.location="/home/";
+                    }
+                    else{
+                        alert("failed! "+result.msg);
+                    }
+                });
+            })
         })
 	</script>
 {% endblock %}
 
 {% block content %}
+    <!--
 	<form action="/logout/" method="get" style="width:900px" >
 		<input type="submit" value="logout" style="float:right">
 	</form>
+    <br />
+    -->
 
-    <form action="/blog/" method="post" style="float:right">
-        {% csrf_token %}
-        blogid:<input type="text" name="id"> {{id}}<br>
-        blogtype: <input type="text" name="blogtypeid"> {{blogtypeid}}<br>
-        title: <input type="text" name="title"> {{title}}<br>
-        content: <input type="text" name="content"> {{content}}<br>
-        <input type="submit" value="save blog">
-        <input type="button" value="cancel" id="cancel">
-        <br/><font color="red">{{ message }}</font>
-    </form>
+    <table>
+        <tr>
+            <td align="right"> blogtype:</td>
+            <td><input type="hidden" name="id" id="id" value="{{id}}">
+                <input type="hidden" name="oldblogtypeid" id="oldblogtypeid" value="{{blogtypeid}}">
+                <select id="blogtypeid" name="blogtypeid" style="width:200px"></select>
+            </td>
+        </tr>
+        <tr>
+            <td align="right">title:</td>
+            <td><input type="text" name="title" id="title" value="{{title}}" style="width:400px"></td>
+        </tr>
+        <tr>
+            <td align="right">content:</td>
+            <td><textarea name="content" id="content" style="width:400px;height:80px;">{{content}}</textarea></td>
+        </tr>
+    </table>
+    <input type="button" value="save blog" id="btnsave" >
+    <input type="button" value="cancel" id="btncancel">
 
 {% endblock %}

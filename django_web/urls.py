@@ -24,12 +24,12 @@ urlpatterns = [
     url(r'^logout/', ccblog_views.logout),
     url(r'^home/', ccblog_views.home),
 
-    url(r'^blogtype/',ccblog_views.user_blogtype),
-    url(r'^addblogtype/',ccblog_views.user_addblogtype),
-    url(r'^delblogtype/',ccblog_views.user_delblogtype),
-    url(r'^editblogtype/',ccblog_views.user_editblogtype),
+    url(r'^blogtype/', ccblog_views.user_blogtype),
+    url(r'^addblogtype/', ccblog_views.user_addblogtype),
+    url(r'^delblogtype/', ccblog_views.user_delblogtype),
+    url(r'^editblogtype/', ccblog_views.user_editblogtype),
 
-    url(r'^bloglist/',ccblog_views.user_bloglist),
-    url(r'^blog/',ccblog_views.user_blog),
-    url(r'^delblog/',ccblog_views.user_delblog),
+    url(r'^bloglist/', ccblog_views.user_bloglist),
+    url(r'^blog/', ccblog_views.user_blog),
+    url(r'^delblog/', ccblog_views.user_delblog),
 ]
