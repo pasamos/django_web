@@ -35,7 +35,7 @@ def login(request):
             return render(request, "ccblog/login.html", {"message": "wrong username!"})
 
     if request.method == 'GET':
-        userSession = request.session.get('username',default=None)
+        userSession = request.session.get('username', default=None)
         if userSession is not None:
             return HttpResponseRedirect('/home/')
 
