@@ -35,7 +35,7 @@ def login(request):
             return render(request, "ccblog/login.html", {"message": "wrong username!"})
 
     if request.method == 'GET':
-        userSession = request.session.get('username',default=None)
+        userSession = request.session.get('username', default=None)
         if userSession is not None:
             return HttpResponseRedirect('/home/')
 
@@ -148,7 +148,7 @@ def user_bloglist(request):
         blogtypeid = request.GET['blogtypeid']
     
     if userid is not None:
-        blog = Blog.objects.filter(userId=userid, blogTypeId=blogtypeid).values('id', 'userId','blogTypeId','title','content','createTime','lastModifyTime').order_by("createTime")
+        blog = Blog.objects.filter(userId=userid, blogTypeId=blogtypeid).values('id', 'userId', 'blogTypeId', 'title', 'content', 'createTime', 'lastModifyTime').order_by("createTime")
         return JsonResponse(list(blog), safe=False)
     else:
         return HttpResponseRedirect('/login/')
